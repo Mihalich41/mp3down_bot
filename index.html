@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LightAudio Download Bot</title>
+</head>
+<body>
+    <iframe id="audioIframe" src="https://lightaudio.ru" style="width:100%; height:80vh;"></iframe>
+    <script>
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Get chat_id from URL parameters
+        const chatId = getUrlParameter('chat_id');
+        console.log(`Chat ID: ${chatId}`);
+
+        document.addEventListener('click', function(event) {
+            if (event.target.tagName === 'A' && event.target.href.includes('storage1.lightaudio.ru')) {
+                event.preventDefault();
+                const downloadLink = event.target.href;
+
+                // Log the download link and chat_id
+                console.log(`Download Link: ${downloadLink}`);
+                console.log(`Chat ID: ${chatId}`);
+
+                // Send the download link and chat_id to the backend
+                fetch('https://functions.yandexcloud.net/d4ehsbdb657rvb5s8u57/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ link: downloadLink, chat_id: chatId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('File sent to Telegram bot successfully!');
+                    } else {
+                        alert('Failed to send file to Telegram bot.');
+                    }
+                });
+            }
+        }, true);
+    </script>
+</body>
+</html>
