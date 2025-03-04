@@ -152,14 +152,17 @@
         // Получаем значение параметра action из URL
         const action = getURLParameter('action');
         
-        // Меняем заголовок в зависимости от параметра action
+        // Меняем заголовок страницы и title в зависимости от параметра action
         const pageTitle = document.getElementById('pageTitle');
         if (action === 'buy') {
             pageTitle.textContent = 'Хочу купить елки';
+            document.title = 'Хочу купить елки';  // Изменяем title
         } else if (action === 'sell') {
             pageTitle.textContent = 'Хочу продать елки';
+            document.title = 'Хочу продать елки';  // Изменяем title
         } else {
             pageTitle.textContent = 'Хочу продать елки';  // Если параметр не задан, показываем стандартный заголовок
+            document.title = 'Хочу продать елки';  // Изменяем title
         }
 
         // Получение данных пользователя из Telegram
