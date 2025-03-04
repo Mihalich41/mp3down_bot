@@ -66,6 +66,22 @@
         .btn:hover {
             background-color: #45a049;
         }
+
+        .get-phone-btn {
+            background-color: #0088cc;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .get-phone-btn:hover {
+            background-color: #007bb5;
+        }
     </style>
 </head>
 <body>
@@ -118,22 +134,35 @@
             <!-- Кнопка отправки -->
             <button type="submit" class="btn">Опубликовать ордер</button>
         </form>
+        
+        <!-- Кнопка для получения номера телефона -->
+        <button type="button" class="get-phone-btn" id="getPhoneBtn">Получить телефон</button>
     </div>
 
     <script>
-        // Дождемся, пока Telegram WebApp инициализируется
+        // Инициализация Telegram Web App
         window.Telegram.WebApp.ready();
 
-        // Получаем данные пользователя из Telegram
+        // Получение данных пользователя из Telegram
         const user = Telegram.WebApp.initDataUnsafe;
 
-        // Вставляем имя, логин и телефон в форму
+        // Вставка имени, логина в форму
         if (user) {
-            const { first_name, username, phone_number } = user;
+            const { first_name, username } = user;
             document.getElementById('name').value = first_name || '';
             document.getElementById('username').value = username || '';
-            document.getElementById('phone').value = phone_number || '';
         }
+
+        // Функция для получения номера телефона
+        document.getElementById('getPhoneBtn').addEventListener('click', function() {
+            // Запросить телефон
+            Telegram.WebApp.requestPhoneNumber();
+
+            // После того как пользователь поделится номером, обработать его
+            Telegram.WebApp.onEvent('phoneNumber', function(phoneNumber) {
+                document.getElementById('phone').value = phoneNumber;
+            });
+        });
 
         // Обработка отправки формы
         document.getElementById('orderForm').addEventListener('submit', function(event) {
@@ -167,7 +196,7 @@
                 isValid = false;
             }
 
-            // Если все данные корректны, отправить данные на Яндекс
+            // Если все данные корректны, отправить данные на сервер
             if (isValid) {
                 const formData = new FormData(document.getElementById('orderForm'));
                 const requestData = {
@@ -178,7 +207,7 @@
                     user_phone: formData.get('phone'),
                 };
 
-                fetch('https://your-yandex-api-endpoint.com', {
+                fetch('https://your-server-endpoint.com', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
