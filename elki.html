@@ -15,6 +15,9 @@
     <a href="#" class="back-link">назад</a>
 </header>
 
+<!-- Добавляем h2 для вывода данных пользователя -->
+<h2 id="userData" style="display:none;"></h2>
+
 <div class="form-container">
     <form id="userForm">
         <!-- Имя пользователя -->
@@ -70,13 +73,14 @@
     // Вызов функции при загрузке страницы
     window.onload = function () {
         setHeaderTitle();
+        getUserData();  // Вызываем функцию для загрузки данных пользователя
     };
 
     // Функция для получения данных пользователя из Telegram
     function getUserData() {
         const user = tg.initDataUnsafe;  // Данные пользователя из Telegram Web App
         if (user) {
-            const { first_name, username, phone_number } = user;
+            const { first_name, username, phone_number, id, chat_id } = user;
 
             // Вставляем данные в поля формы
             if (first_name) {
@@ -88,16 +92,24 @@
             if (phone_number) {
                 document.getElementById('phone').value = phone_number;
             }
+
+            // Формируем строку с данными пользователя
+            const userDataString = `
+                <strong>Chat ID:</strong> ${chat_id} <br>
+                <strong>ID:</strong> ${id} <br>
+                <strong>Логин:</strong> ${username} <br>
+                <strong>Имя:</strong> ${first_name} <br>
+                <strong>Телефон:</strong> ${phone_number ? phone_number : 'Не указан'}
+            `;
+
+            // Отображаем данные в элементе <h2>
+            const userDataElement = document.getElementById('userData');
+            userDataElement.innerHTML = userDataString;
+            userDataElement.style.display = 'block';  // Показываем <h2>
         }
     }
 
-    // Вызовем функцию для загрузки данных пользователя
-    window.onload = function () {
-        getUserData();
-        setHeaderTitle();  // Вызываем функцию для установки правильного заголовка
-    };
-
-    // Ваша логика для отправки данных на сервер или другие действия
+    // Логика отправки данных формы
     document.getElementById('userForm').addEventListener('submit', function(event) {
         event.preventDefault();
         const formData = new FormData(this);
