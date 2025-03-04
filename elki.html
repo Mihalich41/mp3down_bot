@@ -86,7 +86,7 @@
 </head>
 <body>
 
-    <h1>Хочу продать елки</h1>
+    <h1 id="pageTitle">Хочу продать елки</h1>
 
     <div class="form-container">
         <form id="orderForm">
@@ -143,14 +143,41 @@
         // Инициализация Telegram Web App
         window.Telegram.WebApp.ready();
 
+        // Функция для получения параметра из URL
+        function getURLParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Получаем значение параметра action из URL
+        const action = getURLParameter('action');
+        
+        // Меняем заголовок в зависимости от параметра action
+        const pageTitle = document.getElementById('pageTitle');
+        if (action === 'buy') {
+            pageTitle.textContent = 'Хочу купить елки';
+        } else if (action === 'sell') {
+            pageTitle.textContent = 'Хочу продать елки';
+        } else {
+            pageTitle.textContent = 'Хочу продать елки';  // Если параметр не задан, показываем стандартный заголовок
+        }
+
         // Получение данных пользователя из Telegram
         const user = Telegram.WebApp.initDataUnsafe;
 
-        // Вставка имени, логина в форму
+        // Вставка имени и логина в форму
         if (user) {
-            const { first_name, username } = user;
-            document.getElementById('name').value = first_name || '';
-            document.getElementById('username').value = username || '';
+            const { first_name, username, phone_number } = user;
+
+            if (first_name) {
+                document.getElementById('name').value = first_name;
+            }
+            if (username) {
+                document.getElementById('username').value = username;
+            }
+            if (phone_number) {
+                document.getElementById('phone').value = phone_number;
+            }
         }
 
         // Функция для получения номера телефона
