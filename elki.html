@@ -3,175 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Хочу продать елки</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f9;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        .form-container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: bold;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-
-        .form-group input[type="checkbox"] {
-            width: auto;
-            margin-right: 10px;
-        }
-
-        .error {
-            color: red;
-            font-size: 12px;
-        }
-
-        .btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-        }
-
-        .btn:hover {
-            background-color: #45a049;
-        }
-
-        .get-phone-btn {
-            background-color: #0088cc;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            margin-top: 10px;
-        }
-
-        .get-phone-btn:hover {
-            background-color: #007bb5;
-        }
-    </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script type="text/javascript" src="form.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <title>Купить или продать елки</title>
 </head>
 <body>
 
-    <h1 id="pageTitle">Хочу продать елки</h1>
+<header>
+    <div class="logo" id="headerTitle">Купить или продать елки</div>
+    <a href="#" class="back-link">назад</a>
+</header>
 
-    <div class="form-container">
-        <form id="orderForm">
-            <!-- Имя пользователя -->
-            <div class="form-group">
-                <label for="name">Имя:</label>
-                <input type="text" id="name" name="name" readonly required>
-            </div>
+<div class="form-container">
+    <form id="userForm">
+        <!-- Имя пользователя -->
+        <div class="form-group">
+            <label for="name">Имя:</label>
+            <input type="text" id="name" name="name" readonly required>
+        </div>
 
-            <!-- Логин пользователя -->
-            <div class="form-group">
-                <label for="username">Логин:</label>
-                <input type="text" id="username" name="username" readonly required>
-            </div>
+        <!-- Логин пользователя -->
+        <div class="form-group">
+            <label for="username">Логин:</label>
+            <input type="text" id="username" name="username" readonly required>
+        </div>
 
-            <!-- Телефон пользователя -->
-            <div class="form-group">
-                <label for="phone">Телефон:</label>
-                <input type="text" id="phone" name="phone" readonly>
-            </div>
+        <!-- Телефон пользователя (если доступен) -->
+        <div class="form-group">
+            <label for="phone">Телефон:</label>
+            <input type="text" id="phone" name="phone" readonly>
+        </div>
 
-            <!-- Количество лотов -->
-            <div class="form-group">
-                <label for="quantity">Количество лотов:</label>
-                <input type="number" id="quantity" name="quantity" min="1" max="200" required>
-                <div id="quantityError" class="error"></div>
-            </div>
+        <!-- Кнопка отправки -->
+        <button type="submit" class="btn">Отправить</button>
+    </form>
+</div>
 
-            <!-- Цена за 1 лот -->
-            <div class="form-group">
-                <label for="price">Цена за 1 лот (от 5000 до 250000 рублей):</label>
-                <input type="number" id="price" name="price" min="5000" max="250000" required>
-                <div id="priceError" class="error"></div>
-            </div>
+<script type="text/javascript">
+    // Инициализация Telegram Web App
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-            <!-- Галочка подтверждения -->
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" id="confirm" name="confirm" required>
-                    Я подтверждаю
-                </label>
-                <div id="confirmError" class="error"></div>
-            </div>
+    // Функция для получения параметра из URL
+    function getURLParameter(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
 
-            <!-- Кнопка отправки -->
-            <button type="submit" class="btn">Опубликовать ордер</button>
-        </form>
-        
-        <!-- Кнопка для получения номера телефона -->
-        <button type="button" class="get-phone-btn" id="getPhoneBtn">Получить телефон</button>
-    </div>
-
-    <script>
-        // Инициализация Telegram Web App
-        window.Telegram.WebApp.ready();
-
-        // Функция для получения параметра из URL
-        function getURLParameter(name) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
-        }
-
-        // Получаем значение параметра action из URL
+    // Функция для установки правильного заголовка в зависимости от параметра 'action'
+    function setHeaderTitle() {
         const action = getURLParameter('action');
-        
-        // Меняем заголовок страницы и title в зависимости от параметра action
-        const pageTitle = document.getElementById('pageTitle');
+        const headerTitle = document.getElementById('headerTitle');
         if (action === 'buy') {
-            pageTitle.textContent = 'Хочу купить елки';
-            document.title = 'Хочу купить елки';  // Изменяем title
+            document.title = 'Хочу купить елки';
+            headerTitle.textContent = 'Хочу купить елки';  // Изменяем текст заголовка
         } else if (action === 'sell') {
-            pageTitle.textContent = 'Хочу продать елки';
-            document.title = 'Хочу продать елки';  // Изменяем title
+            document.title = 'Хочу продать елки';
+            headerTitle.textContent = 'Хочу продать елки';  // Изменяем текст заголовка
         } else {
-            pageTitle.textContent = 'Хочу продать елки';  // Если параметр не задан, показываем стандартный заголовок
-            document.title = 'Хочу продать елки';  // Изменяем title
+            document.title = 'Купить или продать елки';  // Заголовок по умолчанию
+            headerTitle.textContent = 'Купить или продать елки';  // Заголовок по умолчанию
         }
+    }
 
-        // Получение данных пользователя из Telegram
-        const user = Telegram.WebApp.initDataUnsafe;
+    // Вызов функции при загрузке страницы
+    window.onload = function () {
+        setHeaderTitle();
+    };
 
-        // Вставка имени и логина в форму
+    // Функция для получения данных пользователя из Telegram
+    function getUserData() {
+        const user = tg.initDataUnsafe;  // Данные пользователя из Telegram Web App
         if (user) {
             const { first_name, username, phone_number } = user;
 
+            // Вставляем данные в поля формы
             if (first_name) {
                 document.getElementById('name').value = first_name;
             }
@@ -182,79 +89,39 @@
                 document.getElementById('phone').value = phone_number;
             }
         }
+    }
 
-        // Функция для получения номера телефона
-        document.getElementById('getPhoneBtn').addEventListener('click', function() {
-            // Запросить телефон
-            Telegram.WebApp.requestPhoneNumber();
+    // Вызовем функцию для загрузки данных пользователя
+    window.onload = function () {
+        getUserData();
+        setHeaderTitle();  // Вызываем функцию для установки правильного заголовка
+    };
 
-            // После того как пользователь поделится номером, обработать его
-            Telegram.WebApp.onEvent('phoneNumber', function(phoneNumber) {
-                document.getElementById('phone').value = phoneNumber;
-            });
+    // Ваша логика для отправки данных на сервер или другие действия
+    document.getElementById('userForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        // Пример отправки данных на сервер
+        fetch('https://your-server-endpoint.com', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: formData.get('name'),
+                username: formData.get('username'),
+                phone: formData.get('phone'),
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Данные отправлены успешно:', data);
+        })
+        .catch(error => {
+            console.error('Ошибка при отправке данных:', error);
         });
-
-        // Обработка отправки формы
-        document.getElementById('orderForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            // Очистить предыдущие ошибки
-            document.getElementById('quantityError').innerText = '';
-            document.getElementById('priceError').innerText = '';
-            document.getElementById('confirmError').innerText = '';
-
-            let isValid = true;
-
-            // Проверка на количество лотов
-            const quantity = document.getElementById('quantity').value;
-            if (quantity < 1 || quantity > 200) {
-                document.getElementById('quantityError').innerText = 'Введите количество лотов от 1 до 200.';
-                isValid = false;
-            }
-
-            // Проверка на цену за 1 лот
-            const price = document.getElementById('price').value;
-            if (price < 5000 || price > 250000) {
-                document.getElementById('priceError').innerText = 'Цена должна быть от 5000 до 250000 рублей.';
-                isValid = false;
-            }
-
-            // Проверка на подтверждение
-            const confirm = document.getElementById('confirm').checked;
-            if (!confirm) {
-                document.getElementById('confirmError').innerText = 'Вы должны подтвердить, что хотите продолжить.';
-                isValid = false;
-            }
-
-            // Если все данные корректны, отправить данные на сервер
-            if (isValid) {
-                const formData = new FormData(document.getElementById('orderForm'));
-                const requestData = {
-                    quantity: formData.get('quantity'),
-                    price: formData.get('price'),
-                    user_name: formData.get('name'),
-                    user_username: formData.get('username'),
-                    user_phone: formData.get('phone'),
-                };
-
-                fetch('https://your-server-endpoint.com', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(requestData),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert('Ордер успешно опубликован!');
-                })
-                .catch(error => {
-                    alert('Произошла ошибка при отправке данных.');
-                    console.error(error);
-                });
-            }
-        });
-    </script>
+    });
+</script>
 
 </body>
 </html>
